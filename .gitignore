@@ -1,0 +1,11 @@
+#ides
+.idea
+.vscode
+
+#build
+node_modules
+build
+bin
+
+#private testing folder
+tests
