@@ -26,8 +26,7 @@ To build the binaries as well:
 npm run build
 ```
 
-# Why a scraper?
-Why not just use the torrents? Because I'm lazy, and there was already an API for the website on npm.
-
-# License
-MIT.
+# FAQ
+* **Why "Project Angel"?** A whim. The logo for said website has succubus wings (I think), so I wanted something to complement/counter that.
+* **Why not just use the torrents?** Because I'm lazy, and there was already an API for the website on npm.
+* **License?** MIT.
