@@ -3,6 +3,7 @@ import imagesToPdf from "images-to-pdf";
 import * as fs from "fs";
 import * as path from "path";
 import tempDirectory from "temp-dir";
+import chalk from "chalk";
 
 const pdfs : { [key : string]: { path: string, images: string[] } } = {};
 
@@ -38,7 +39,10 @@ const PdfFormat : SingleFormat = {
   },
   onPage({ doujin }, image): void | Promise<void> {
     // Save the image into the folder
-    if (/^(?:png|jpe?g)$/.test(image.extension)) return;
+    if (/^(?:png|jpe?g)$/.test(image.extension)) {
+      console.warn(`${chalk.yellowBright("WARN: ")}Unsupported file extension for page ${image.pageNumber}: "${image.extension}". Skipping...`)
+      return;
+    }
 
     const outputFile = path.join(pdfs[doujin.doujinId].path, `${image.pageNumber}.${image.extension}`);
     fs.writeFileSync(outputFile, image.data);
