@@ -54,6 +54,9 @@ interface BaseFormat {
   onThumbnail?: (details: Details, image : DownloadedImage) => PromiseOrNot<void>;
   /**
    * Called when a page of the doujin has been downloaded.
+   *
+   * Since pages are not downloaded in order, you need to utilize the page number
+   * to ensure the correct order of images.
    * @param details The download details.
    * @param image The image, along with the image data as a `Buffer` and the page number.
    */
