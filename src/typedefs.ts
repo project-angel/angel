@@ -33,6 +33,12 @@ export type DownloadedImage = Image & { data : Buffer, pageNumber? : number };
 
 interface BaseFormat {
   /**
+   * Cleans up the formatter's working directory. In this function, you should
+   * clear all caches saved on the disk, or similar.
+   * @param details The download details.
+   */
+  cleanup? : (details : Details) => PromiseOrNot<void>;
+  /**
    * Called prior to downloading the cover, thumbnail, or pages. Use this
    * to setup your file format or to store information beforehand.
    * @param details The download details.

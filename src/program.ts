@@ -5,6 +5,10 @@ import * as fs from "fs";
 import * as path from "path";
 import {downloadAll} from "./downloader";
 import "log-timestamp";
+import die from "./util/die";
+import isValidURL from "./util/isValidURL";
+import readListFile from "./util/readListFile";
+import {info} from "./util/log";
 
 export const argv = yargs(process.argv.slice(2))
   .usage("Usage: $0 <-f format> <-c|-l|-u> <target> [options]")
@@ -71,6 +75,20 @@ export const argv = yargs(process.argv.slice(2))
         "Whether or not to ignore rate limits (which are set to prevent load " +
         "on the website's servers.)"
     },
+    "concurrent": {
+      type: "number",
+      default: 6,
+      nargs: 1,
+      description:
+        "Sets the maximum amount of concurrent image downloads."
+    },
+    "clean": {
+      type: "boolean",
+      default: false,
+      description:
+        "If set to true, formatters will be asked to clean up before downloading, " +
+        "which will force pages to redownload."
+    },
     v: {
       type: "count",
       alias: "verbose",
@@ -80,35 +98,7 @@ export const argv = yargs(process.argv.slice(2))
   .argv;
 
 (async () => {
-  function die(message : string, code = 1) {
-    console.error((code === 0 ? chalk.greenBright("DONE: ") : chalk.redBright("ABORTED: ")) + message);
-    process.exit(code);
-  }
-
-  function isValidURL(urlString : string) : boolean {
-    try {
-      const url = new URL(urlString);
-      return /(\.|^)nhentai\.net$/i.test(url.hostname) && /^\/g\/\d+\/?$/i.test(url.pathname);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function readList(items : string[]) : number[] {
-    const codes = [];
-    for (const item of items) {
-      const trimmed = item.trim();
-      if (!isNaN(+(trimmed)))
-        codes.push(trimmed);
-      else if (isValidURL(trimmed))
-        codes.push(/\/g\/(\d+)/g.exec(trimmed)[1]);
-      else {
-        console.error(`${chalk.yellowBright("WARNING: ")}Skipping invalid URL/code from list: ${trimmed}`);
-      }
-    }
-    return codes;
-  }
-
+  // Parse doujins to download
   const toDownload : number[] = [];
 
   if (!argv.u && argv.c == null && !argv.l) {
@@ -139,18 +129,20 @@ export const argv = yargs(process.argv.slice(2))
       for (const list of argv.l) {
         if (!fs.existsSync(path.resolve(list)))
           die(`File does not exist: ${list}`);
-        toDownload.push(...readList(
+        toDownload.push(...readListFile(
           Buffer.from(fs.readFileSync(path.resolve(list))).toString("utf8").split("\n")
         ));
       }
     else {
       if (!fs.existsSync(path.resolve(argv.l)))
         die(`File does not exist: ${argv.l}`);
-      toDownload.push(...readList(
+      toDownload.push(...readListFile(
         Buffer.from(fs.readFileSync(path.resolve(argv.l))).toString("utf8").split("\n")
       ));
     }
   }
+
+  // Argument validation
 
   if (!Object.keys(supportedFormats).includes(argv.f))
     die(`Unsupported format: ${argv.f}. Available formats: ${
@@ -160,9 +152,18 @@ export const argv = yargs(process.argv.slice(2))
   if (argv["ignore-limits"])
     console.warn(`${chalk.yellowBright("WARNING: ")}Ignoring warnings! Please don't overuse this!`)
 
+  if (argv.concurrent) {
+    if (argv.concurrent < 1)
+      die("Cannot have 0 concurrent queues.");
+    if (argv.concurrent > 200)
+      die("Cannot have more than 200 concurrent queues.");
+  }
+
+  // Begin downloads
+
   const codes = [...new Set(toDownload)];
 
-  console.log(`${chalk.blueBright("INFO: ")}Grabbing ${codes.length} ${
+  info(`Grabbing ${codes.length} ${
     codes.length == 1 ? "doujin" : "doujins"
   }...`);
 

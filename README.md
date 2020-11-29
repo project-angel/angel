@@ -9,9 +9,11 @@ Project Angel　（プロジェクトエンゼル）　は真面目なプロジ�
 
 # Usage
 ```bash
-project-angel <-c|-u|-l> <target> 
+project-angel <-f|--format> <format> <-c|-u|-l> <target> 
 ```
 You need to define at least one source with `-c <code>`, `-u <url>`, or `-l <path to file list>`. You also need to provide a format with `-f` or `--format`. A list of available formats is in the program's help page, which you can open by passing the `-h` argument.
+
+Project Angel downloads the images in a shotgun-like method: where multiple images from multiple targets are downloaded at once. If you prefer that each doujin is downloaded one at a time, set the `--concurrent` argument to `1`.
 
 # Development
 It's definitely open to changes, especially more formats to convert into. Make a pull request and I'll check it out.

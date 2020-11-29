@@ -13,6 +13,10 @@ const downloaded : { [key : string] : string[] } = {};
  */
 const ImgFormat : MultipleFormat = {
   single: false,
+  cleanup({downloadInfo}): void {
+    if (fs.existsSync(downloadInfo.output))
+      fs.rmdirSync(downloadInfo.output, { recursive: true });
+  },
   preDownload({ downloadInfo, doujin }): void | Promise<void> {
     if (!fs.existsSync(downloadInfo.output))
       fs.mkdirSync(downloadInfo.output, { recursive: true });
