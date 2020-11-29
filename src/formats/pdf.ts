@@ -38,6 +38,8 @@ const PdfFormat : SingleFormat = {
   },
   onPage({ doujin }, image): void | Promise<void> {
     // Save the image into the folder
+    if (/^(?:png|jpe?g)$/.test(image.extension)) return;
+
     const outputFile = path.join(pdfs[doujin.doujinId].path, `${image.pageNumber}.${image.extension}`);
     fs.writeFileSync(outputFile, image.data);
     pdfs[doujin.doujinId].images.push(outputFile);
